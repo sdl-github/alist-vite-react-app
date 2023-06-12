@@ -1,33 +1,21 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useRecoilValue } from 'recoil'
+import NavBar from './components/layout/navbar'
+import { serverApiState } from './store/server'
+import Footer from './components/layout/footer'
+import { Introduce } from './components/home/introduce'
+import { Index } from './components/home'
+
 
 function App() {
-  const [count, setCount] = useState(0)
-
+  const api = useRecoilValue(serverApiState)
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React + UnoCSS</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p className='text-pink'>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <div className="fixed top-0 h-screen w-full bg-gradient-to-br from-indigo-50 via-white to-cyan-100" />
+      <NavBar />
+      <main className="min-h-screen w-full">
+        {api ? <Index /> : <Introduce />}
+      </main>
+      <Footer />
     </>
   )
 }

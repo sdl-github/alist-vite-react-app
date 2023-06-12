@@ -10,14 +10,32 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@douyinfe/semi-icons": "^2.37.0",
+    "@douyinfe/semi-ui": "^2.37.0",
+    "@unocss/reset": "^0.53.1",
+    "axios": "^1.4.0",
+    "classnames": "^2.3.2",
+    "focus-trap-react": "^10.1.4",
+    "framer-motion": "^10.12.16",
+    "ms": "3.0.0-canary.1",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.12.1",
+    "react-wrap-balancer": "^0.5.0",
+    "recoil": "^0.7.7",
+    "swr": "^2.1.5",
+    "use-debounce": "^9.0.4"
   },
   "devDependencies": {
+    "@babel/core": "^7.22.5",
+    "@babel/preset-typescript": "^7.22.5",
+    "@types/ms": "^0.7.31",
+    "@types/node": "^20.3.0",
     "@types/react": "^18.0.37",
     "@types/react-dom": "^18.0.11",
     "@typescript-eslint/eslint-plugin": "^5.59.0",
     "@typescript-eslint/parser": "^5.59.0",
+    "@unocss/transformer-attributify-jsx-babel": "^0.53.1",
     "@vitejs/plugin-react-swc": "^3.0.0",
     "eslint": "^8.38.0",
     "eslint-plugin-react-hooks": "^4.6.0",
