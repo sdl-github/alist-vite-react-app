@@ -5,6 +5,7 @@ import { serverApiState } from "@/store/server"
 import { useEffect } from "react"
 import { useSearchParams } from 'react-router-dom';
 import { Folder } from "./folder"
+import { FilePreview } from "./file-preview"
 
 export function Index() {
     const api = useRecoilValue(serverApiState)
@@ -32,6 +33,7 @@ export function Index() {
                 </div>
             }
             {state.type === Type.Folder && <Folder />}
+            {state.type === Type.File && <FilePreview />}
         </>
     )
 }
