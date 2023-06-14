@@ -30,14 +30,12 @@ export type SearchNode = {
 
 export type FsSearchResp = PageResp<SearchNode>
 
-export type FsGetResp = Resp<
-  Obj & {
-    raw_url: string
-    readme: string
-    provider: string
-    related: Obj[]
-  }
->
+export type FsGetResp = Obj & {
+  raw_url: string
+  readme: string
+  provider: string
+  related: Obj[]
+}
 
 export type EmptyResp = Resp<{}>
 

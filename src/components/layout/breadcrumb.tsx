@@ -13,7 +13,6 @@ export function Breadcrumb() {
 
     useEffect(() => {
         const path = state.path
-        console.log('path===>', path);
         const arr = path.split('/').filter(item => !!item)
         setCrumbs(arr)
     }, [state, state.path])
@@ -21,20 +20,23 @@ export function Breadcrumb() {
     return (
         <>
             <div className="mx-2">
-                <SemiBreadcrumb 
-                onClick={(e) => {
-                    if(e.name === 'Home') {
-                        navigate('/')
-                    }
-                    const index = crumbs.findIndex(crumb => crumb === e.name)
-                    const data = crumbs.slice(0, index + 1)
-                    const path = data.join('/') 
-                    console.log(crumbs);
-                    console.log(index);
-                    console.log(data);
-                    console.log(path);
-                    navigate(`/?path=${path}&type=${Type.Folder}`)
-                }} compact={false}>
+                <SemiBreadcrumb
+                    onClick={(e) => {
+                        if (e.name === 'Home') {
+                            navigate('/')
+                        }
+                        const index = crumbs.findIndex(crumb => crumb === e.name)
+                        const data = crumbs.slice(0, index + 1)
+                        const path = data.join('/')
+                        console.log(crumbs);
+                        console.log(index);
+                        console.log(data);
+                        console.log(path);
+                        if (path === state.path) {
+                            return
+                        }
+                        navigate(`/?path=${path}&type=${Type.Folder}`)
+                    }} compact={false}>
                     <SemiBreadcrumb.Item name={'/'} icon={<IconHome size="small" />}>Home</SemiBreadcrumb.Item>
                     {
                         crumbs?.map(crumb => {
