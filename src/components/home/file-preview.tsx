@@ -13,6 +13,7 @@ import VideoPreview from "./video-preview"
 import { Skeleton } from "@douyinfe/semi-ui"
 import { NotPreview } from "./not-preview"
 import LoadingSpinner from "../shared/icons/loading-spinner"
+import { supabase } from "@/lib/supabase-client"
 
 
 export interface Preview {
@@ -105,17 +106,32 @@ export function FilePreview() {
     const serverApi = useRecoilValue(serverApiState)
 
     const { isLoading, data, error, mutate } = useSWR(serverApi ? `${serverApi}/api/fs/get/${state.path}` : null, (): Promise<FsGetResp> => {
-        return request.post(`${serverApi}/api/fs/get`, {
+        return request.post(`${serverApi}/api/fs/get/${state.path}`, {
             ...params,
             path: state.path
         })
     })
 
     useEffect(() => {
-        setState({
-            ...state,
-            obj: data
-        })
+        if (data && data.path) {
+            setState({
+                ...state,
+                obj: data
+            })
+            supabase.from('record').upsert({
+                name: data?.name,
+                path: data?.path,
+                cover: data?.thumb,
+                type: data?.type
+            })
+                .eq(
+                    "path", data?.path
+                )
+                .then((res) => {
+                    console.log(res);
+                })
+        }
+
     }, [data])
 
     return (
