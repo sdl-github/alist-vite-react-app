@@ -18,7 +18,6 @@
     "dplayer": "^1.27.1",
     "focus-trap-react": "^10.1.4",
     "framer-motion": "^10.12.16",
-    "griffith": "^1.30.0",
     "hls.js": "^1.4.5",
     "ms": "3.0.0-canary.1",
     "react": "^18.2.0",

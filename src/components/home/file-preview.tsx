@@ -10,6 +10,9 @@ import FileIcon from '@/assets/file.png'
 import { allPreviewFileFormat, fileFormatState } from "@/store/preview"
 import { Obj, ObjType } from "@/lib/types/obj"
 import VideoPreview from "./video-preview"
+import { Skeleton } from "@douyinfe/semi-ui"
+import { NotPreview } from "./not-preview"
+import LoadingSpinner from "../shared/icons/loading-spinner"
 
 
 export interface Preview {
@@ -70,6 +73,11 @@ const previews: Preview[] = [
         exts: ["doc", "docx", "ppt", "pptx", "xls", "xlsx", "pdf"],
         provider: /^Aliyundrive(Share)?$/,
     },
+    {
+        name: '*',
+        exts: "*",
+        component: <NotPreview />
+    }
 ]
 
 const ext = (path: string): string => {
@@ -96,8 +104,7 @@ export function FilePreview() {
     const [state, setState] = useRecoilState(objState)
     const serverApi = useRecoilValue(serverApiState)
 
-
-    const { isLoading, data, error, mutate } = useSWR(serverApi ? `${serverApi}/api/fs/get` : null, (): Promise<FsGetResp> => {
+    const { isLoading, data, error, mutate } = useSWR(serverApi ? `${serverApi}/api/fs/get/${state.path}` : null, (): Promise<FsGetResp> => {
         return request.post(`${serverApi}/api/fs/get`, {
             ...params,
             path: state.path
@@ -111,7 +118,6 @@ export function FilePreview() {
         })
     }, [data])
 
-
     return (
         <>
             <div className="flex min-h-screen w-full flex-col items-center py-32">
@@ -119,35 +125,22 @@ export function FilePreview() {
                     <div className="flex mb-2 items-center">
                         <Breadcrumb />
                     </div>
-                    {
-                        data && getPreviewComp(data) ? getPreviewComp(data) : (
+                    {isLoading ?
+                        (
                             <>
-                                <div className="flex justify-center items-center flex-col mt-10">
-                                    <div className="w-[200px] h-[200px] rounded">
-                                        <img src={FileIcon} width={200} height={200} />
-                                    </div>
-                                    <div className="my-4 font-bold text-xl">{data?.name}</div>
-                                    <div className="flex">
-                                        <a
-                                            className="mx-auto mb-5 flex max-w-fit animate-fade-up items-center justify-center space-x-2 overflow-hidden rounded-full bg-blue-100 px-7 py-2 transition-colors hover:bg-blue-200"
-                                        >
-                                            <p className="text-sm font-semibold text-[#1d9bf0] cursor-pointer">
-                                                复制链接
-                                            </p>
-                                        </a>
-                                        <a
-                                            className="ml-4 mx-auto mb-5 flex max-w-fit animate-fade-up items-center justify-center space-x-2 overflow-hidden rounded-full bg-blue-100 px-7 py-2 transition-colors hover:bg-blue-200"
-                                        >
-                                            <p className="text-sm font-semibold text-[#1d9bf0] cursor-pointer">
-                                                下载
-                                            </p>
-                                        </a>
-                                    </div>
+                                <div className="flex w-full flex-col items-center justify-center py-32">
+                                    <LoadingSpinner />
                                 </div>
                             </>
                         )
-                    }
-
+                        :
+                        (
+                            <>
+                                {
+                                    data && getPreviewComp(data)
+                                }
+                            </>
+                        )}
                 </div>
             </div>
         </>

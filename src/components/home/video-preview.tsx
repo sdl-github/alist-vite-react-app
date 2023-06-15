@@ -1,21 +1,13 @@
 
 import request from '@/lib/request'
-import Hls from "hls.js"
 import { objState } from '@/store/obj'
 import { serverApiState } from '@/store/server'
-import DPlayer from 'dplayer';
 import React, { useEffect, useState } from 'react'
-import { useRecoilState, useRecoilValue } from 'recoil'
+import { useRecoilValue } from 'recoil'
 import useSWR from 'swr'
-
-const sources = {
-    hd: {
-        play_url: 'https://zhstatic.zhihu.com/cfe/griffith/zhihu2018_hd.mp4',
-    },
-    sd: {
-        play_url: 'https://zhstatic.zhihu.com/cfe/griffith/zhihu2018_sd.mp4',
-    },
-}
+import DPlayer, { DPlayerOptions } from 'dplayer';
+import Hls from "hls.js"
+import { Skeleton } from '@douyinfe/semi-ui'
 
 export interface Meta {
     duration: number
@@ -46,72 +38,76 @@ export interface LiveTranscodingTaskList {
 }
 
 const VideoPreview: React.FC = () => {
-
-    let dPlayer: any = null
     const serverApi = useRecoilValue(serverApiState)
     const [params, setParams] = useState({
         password: '',
         method: "video_preview",
     })
-    const { isLoading, data, error, mutate } = useSWR(serverApi ? `${serverApi}/api/fs/other` : null, (): Promise<PreviewData> => {
+    const state = useRecoilValue(objState)
+    const { isLoading, data, error, mutate } = useSWR(serverApi ? `${serverApi}/api/fs/other/${state.path}` : null, (): Promise<PreviewData> => {
         return request.post(`${serverApi}/api/fs/other`, {
             ...params,
             path: state.path
         })
     })
-    const state = useRecoilValue(objState)
 
+    let player: DPlayer | null = null
+
+    const option: DPlayerOptions = {
+        container: null,
+        autoplay: true
+    }
 
     useEffect(() => {
-        const sources: any = {}
-        data?.video_preview_play_info.live_transcoding_task_list.forEach(source => {
-            const template = source.template_id.toLowerCase()
-            sources[template] = {
-                play_url: source.url
-            }
-        })
-        console.log('video_preview is=>>', { data });
-        console.log('sources is=>>', { sources });
-        const dom = document.getElementById('player')
-        console.log({ dom });
-        if (dom && !dPlayer) {
-            // hls.attachMedia(video)
-            const dp = new DPlayer({
-                container: dom,
-                video: {
-                    url: sources.fhd.play_url,
-                    type: 'customHls',
-                    customType: {
-                        customHls: function (video, player) {
-                            console.log('====>');
-                            console.log(video);
-                            console.log(player);
-                            
-                            
-                            const hls = new Hls();
-                            hls.loadSource(video.src);
-                            hls.attachMedia(video);
-                        },
+        let list = [] as LiveTranscodingTaskList[]
+        list = data?.video_preview_play_info.live_transcoding_task_list.filter(
+            (l) => l.url
+        ) || []
+        if (list.length === 0) {
+            console.log("No transcoding video found")
+            return
+        }
+        const url = list[list.length - 1].url
+        if (!player) {
+            option.container = document.getElementById('dplayer')
+            option.pic = state.obj?.thumb
+            option.video = {
+                url,
+                type: 'customHls',
+                customType: {
+                    customHls: function (video: HTMLMediaElement, player: DPlayer) {
+                        const hls = new Hls();
+                        hls.loadSource(video.src);
+                        hls.attachMedia(video);
+                        if (!video.src) {
+                            video.src = url
+                        }
                     },
                 },
-            });
-            dPlayer = dp
+            }
+            player = new DPlayer(option);
         }
-        console.log("dPlayer==>", { dPlayer });
 
+        return () => {
+            player?.destroy()
+            player = null
+        }
     }, [data])
-
+    
+    const placeholder = (
+        <div className="flex justify-center items-center flex-col mt-10">
+            <Skeleton.Image className="rounded" style={{width:"100%", height: "30vh"}}/>
+            <Skeleton.Title className='w-full mt-4' />
+        </div>
+    );
     return (
         <>
-            {isLoading ? <div>loading</div> : (
-                <>
-                    <div className='w-full' id='player' />
-                    <div className='my-4 font-bold'>
-                        <div>{state.obj?.name}</div>
-                    </div>
-                </>
-            )}
-
+            <Skeleton placeholder={placeholder} active loading={isLoading}>
+                <div id="dplayer"></div>
+                <div className='my-4 font-bold'>
+                    <div>{state.obj?.name}</div>
+                </div>
+            </Skeleton>
         </>
     )
 }
