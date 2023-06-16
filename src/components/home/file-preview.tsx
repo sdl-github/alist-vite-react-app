@@ -13,7 +13,8 @@ import VideoPreview from "./video-preview"
 import { Skeleton } from "@douyinfe/semi-ui"
 import { NotPreview } from "./not-preview"
 import LoadingSpinner from "../shared/icons/loading-spinner"
-import { supabase } from "@/lib/supabase-client"
+import { useHistoryRecord } from "@/lib/hooks/use-history-record"
+ 
 
 
 export interface Preview {
@@ -104,34 +105,24 @@ export function FilePreview() {
     })
     const [state, setState] = useRecoilState(objState)
     const serverApi = useRecoilValue(serverApiState)
+    const { upsertHistoryRecord } = useHistoryRecord()
 
     const { isLoading, data, error, mutate } = useSWR(serverApi ? `${serverApi}/api/fs/get/${state.path}` : null, (): Promise<FsGetResp> => {
-        return request.post(`${serverApi}/api/fs/get/${state.path}`, {
+        return request.post(`${serverApi}/api/fs/get`, {
             ...params,
             path: state.path
         })
     })
 
     useEffect(() => {
-        if (data && data.path) {
+        if (serverApi && data && state.path) {
+            const { name, type, thumb } = data
+            upsertHistoryRecord({name, type, thumb, serverApi, path: state.path})
             setState({
                 ...state,
                 obj: data
             })
-            supabase.from('record').upsert({
-                name: data?.name,
-                path: data?.path,
-                cover: data?.thumb,
-                type: data?.type
-            })
-                .eq(
-                    "path", data?.path
-                )
-                .then((res) => {
-                    console.log(res);
-                })
         }
-
     }, [data])
 
     return (

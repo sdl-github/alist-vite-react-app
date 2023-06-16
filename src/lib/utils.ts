@@ -6,6 +6,13 @@ export const timeAgo = (timestamp: Date, timeOnly?: boolean): string => {
     }`;
 };
 
+export const formatSecond = (seconds: number) => {
+  if(!seconds) {
+    return '--'
+  }
+  return ms(seconds * 1000)
+} 
+
 export async function fetcher<JSON = any>(
   input: RequestInfo,
   init?: RequestInit,

@@ -27,8 +27,8 @@ export function Folder() {
         refresh: false
     })
 
-    const { isLoading, data, error, mutate } = useSWR(serverApi ? `${serverApi}/api/fs/list` : null, (): Promise<FsListResp> => {
-        return request.post(`${serverApi}/api/fs/list/${state.path}`, {
+    const { isLoading, data, error, mutate } = useSWR(serverApi ? `${serverApi}/api/fs/list/${state.path}` : null, (): Promise<FsListResp> => {
+        return request.post(`${serverApi}/api/fs/list`, {
             ...params,
             path: state.path
         })
