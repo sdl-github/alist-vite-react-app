@@ -6,7 +6,7 @@ import React, { useEffect, useState } from 'react'
 import { useRecoilValue } from 'recoil'
 import useSWRImmutable from 'swr/immutable'
 import Hls from "hls.js"
-import { Skeleton } from '@douyinfe/semi-ui'
+import { Skeleton, Toast } from '@douyinfe/semi-ui'
 import { useHistoryRecord } from '@/lib/hooks/use-history-record'
 import Artplayer from "artplayer"
 import { Option } from "artplayer/types/option"
@@ -84,6 +84,7 @@ const VideoPreview: React.FC = () => {
         ],
         whitelist: [],
         moreVideoAttr: {
+            // @ts-ignore
             "webkit-playsinline": true,
             playsInline: true,
         },
@@ -134,6 +135,9 @@ const VideoPreview: React.FC = () => {
                     console.log(res);
                     if (res && res.seeTime) {
                         player!.seek = Number(res.seeTime)
+                        setTimeout(() => {
+                            Toast.success("已自动定位到上次观看位置")
+                        }, 1000)
                     }
                 })
             })
