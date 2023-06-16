@@ -5,10 +5,12 @@ import { serverApiState } from '@/store/server'
 import React, { useEffect, useState } from 'react'
 import { useRecoilValue } from 'recoil'
 import useSWRImmutable from 'swr/immutable'
-import DPlayer, { DPlayerEvents, DPlayerOptions } from 'dplayer';
 import Hls from "hls.js"
 import { Skeleton } from '@douyinfe/semi-ui'
 import { useHistoryRecord } from '@/lib/hooks/use-history-record'
+import Artplayer from "artplayer"
+import { Option } from "artplayer/types/option"
+import artplayerPluginControl from 'artplayer-plugin-control'
 
 export interface Meta {
     duration: number
@@ -53,11 +55,55 @@ const VideoPreview: React.FC = () => {
         })
     })
 
-    let player: DPlayer | null = null
-
-    const option: DPlayerOptions = {
-        container: null,
-        autoplay: true
+    let player: Artplayer | null = null
+    const option: Option = {
+        id: "player",
+        container: "#video-player",
+        title: state.obj?.name,
+        volume: 0.5,
+        autoplay: true,
+        autoSize: false,
+        autoMini: true,
+        loop: false,
+        theme: '#23ade5',
+        flip: true,
+        playbackRate: true,
+        aspectRatio: true,
+        setting: true,
+        hotkey: true,
+        pip: true,
+        mutex: true,
+        fullscreen: true,
+        fullscreenWeb: true,
+        subtitleOffset: true,
+        miniProgressBar: false,
+        playsInline: true,
+        quality: [],
+        plugins: [
+            artplayerPluginControl()
+        ],
+        whitelist: [],
+        moreVideoAttr: {
+            "webkit-playsinline": true,
+            playsInline: true,
+        },
+        type: "m3u8",
+        customType: {
+            m3u8: function (video: HTMLMediaElement, url: string) {
+                const hls = new Hls()
+                hls.loadSource(url)
+                hls.attachMedia(video)
+                if (!video.src) {
+                    video.src = url
+                }
+            },
+        },
+        lang: "zh-cn",
+        lock: true,
+        fastForward: true,
+        // autoPlayback: true,
+        autoOrientation: true,
+        airplay: true,
     }
 
     useEffect(() => {
@@ -72,32 +118,22 @@ const VideoPreview: React.FC = () => {
             console.log("No transcoding video found")
             return
         }
-        const url = list[list.length - 1].url
         if (!player) {
-            option.container = document.getElementById('dplayer')
-            option.pic = state.obj?.thumb
-            option.video = {
-                url,
-                type: 'customHls',
-                customType: {
-                    customHls: function (video: HTMLMediaElement, player: DPlayer) {
-                        const hls = new Hls();
-                        hls.loadSource(video.src);
-                        hls.attachMedia(video);
-                        if (!video.src) {
-                            video.src = url
-                        }
-                    },
-                },
-            }
-            player = new DPlayer(option);
-            const event = 'loadeddata' as DPlayerEvents.loadeddata
-            player.on(event, () => {
+            option.url = list[list.length - 1].url
+            option.quality = list.map((item, i) => {
+                return {
+                    html: item.template_id,
+                    url: item.url,
+                    default: i === list.length - 1,
+                }
+            })
+            player = new Artplayer(option)
+            player.on('ready', () => {
                 console.log('DPlayerEvents.loadeddata=>');
                 queryHistoryRecordDetail(state.path).then(res => {
                     console.log(res);
-                    if(res && res.seeTime) {
-                        player?.seek(res.seeTime)
+                    if (res && res.seeTime) {
+                        player!.seek = Number(res.seeTime)
                     }
                 })
             })
@@ -105,11 +141,11 @@ const VideoPreview: React.FC = () => {
 
         return () => {
             console.log('destroy==>');
-            if(state.obj && serverApi && state.path) {
+            if (state.obj && serverApi && state.path) {
                 const { name, type, thumb } = state.obj
                 upsertHistoryRecord({ name, type, thumb, serverApi, path: state.path, seeTime: player?.video.currentTime })
             }
-            
+
             player?.destroy()
             player = null
         }
@@ -117,14 +153,15 @@ const VideoPreview: React.FC = () => {
 
     const placeholder = (
         <div className="flex justify-center items-center flex-col mt-10">
-            <Skeleton.Image className="rounded" style={{ width: "100%", height: "30vh" }} />
+            <Skeleton.Image className="rounded" style={{ width: "100%", height: "60vh" }} />
             <Skeleton.Title className='w-full mt-4' />
         </div>
     );
+
     return (
         <>
             <Skeleton placeholder={placeholder} active loading={isLoading}>
-                <div id="dplayer"></div>
+                <div className='w-full h-60vh' id="video-player"></div>
                 <div className='my-4 font-bold'>
                     <div>{state.obj?.name}</div>
                 </div>
