@@ -140,7 +140,7 @@ const ConnectServerModal: FC<IProps> = ({ show, setShow }) => {
                                         <Col span={24}>
                                             <Form.Input
                                                 trigger='blur'
-                                                initValue={"http://av.saybai.cn"}
+                                                initValue={"https://alist.saybai.cn"}
                                                 rules={[
                                                     { required: true, message: '请输入域名' },
                                                 ]}
