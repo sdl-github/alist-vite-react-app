@@ -2,7 +2,7 @@ import request from "@/lib/request"
 import { FsGetResp } from "@/lib/types/resp"
 import { objState } from "@/store/obj"
 import { serverApiState } from "@/store/server"
-import {  useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { useRecoilValue, useRecoilState } from "recoil"
 import useSWR from "swr"
 import { Breadcrumb } from "../layout/breadcrumb"
@@ -11,7 +11,8 @@ import VideoPreview from "./video-preview"
 import { NotPreview } from "./not-preview"
 import LoadingSpinner from "../shared/icons/loading-spinner"
 import { useHistoryRecord } from "@/lib/hooks/use-history-record"
- 
+import ImagePreview from "./image-preview"
+
 
 
 export interface Preview {
@@ -50,6 +51,7 @@ const previews: Preview[] = [
     {
         name: "Image",
         type: ObjType.IMAGE,
+        component: <ImagePreview />
     },
     {
         name: "Video",
@@ -114,7 +116,7 @@ export function FilePreview() {
     useEffect(() => {
         if (serverApi && data && state.path) {
             const { name, type, thumb } = data
-            upsertHistoryRecord({name, type, thumb, serverApi, path: state.path})
+            upsertHistoryRecord({ name, type, thumb, serverApi, path: state.path })
             setState({
                 ...state,
                 obj: data
