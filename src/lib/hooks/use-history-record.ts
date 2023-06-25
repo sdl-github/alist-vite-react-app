@@ -28,9 +28,11 @@ export function useHistoryRecord() {
         }) as ListResult<HistoryRecord>
     }
 
-    const queryHistoryRecordDetail = async (path: string) => {
+    const queryHistoryRecordDetail = async (path?: string) => {
         try {
-            return await pb.collection('history').getFirstListItem(`path="${path}"`) as HistoryRecord
+            return await pb.collection('history').getFirstListItem(path ? `path="${path}"` : '', {
+                sort: '-updated',
+            }) as HistoryRecord
         } catch (e) {
             return false
         }
@@ -38,7 +40,7 @@ export function useHistoryRecord() {
 
     const upsertHistoryRecord = async (record: HistoryRecord) => {
         console.log('upsertHistoryRecord==>');
-        
+
         const data = await queryHistoryRecordDetail(record.path!)
         if (data) {
             await pb.collection('history').update(data.id!, { ...data, ...record })
