@@ -36,7 +36,7 @@ export function useHistoryRecord() {
         return res.data.rows as DataType[]
     }
 
-    const queryHistoryRecordDetail = async (path: string) => {
+    const queryHistoryRecordDetail = async (path?: string) => {
         try {
             const res =  await axios.get(`${BASE_API}/api/data/get`, {
                 params: {
