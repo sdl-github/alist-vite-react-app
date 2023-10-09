@@ -11,6 +11,8 @@ import { useHistoryRecord } from '@/lib/hooks/use-history-record'
 import Artplayer from "artplayer"
 import { Option } from "artplayer/types/option"
 import artplayerPluginControl from 'artplayer-plugin-control'
+import { useSearchParams } from 'react-router-dom'
+import { formatSecond } from '@/lib/utils'
 
 export interface Meta {
     duration: number
@@ -41,6 +43,9 @@ export interface LiveTranscodingTaskList {
 }
 
 const VideoPreview: React.FC = () => {
+
+    const [searchParams, setSearchParams] = useSearchParams();
+
     const serverApi = useRecoilValue(serverApiState)
     const { queryHistoryRecordDetail, upsertHistoryRecord } = useHistoryRecord()
     const [params, setParams] = useState({
@@ -131,12 +136,20 @@ const VideoPreview: React.FC = () => {
             player = new Artplayer(option)
             player.on('ready', () => {
                 console.log('DPlayerEvents.loadeddata=>');
+                const seeTime = searchParams.get('seeTime')
+                if (seeTime) {
+                    player!.seek = Number(seeTime)
+                    setTimeout(() => {
+                        Toast.success(`已自动定位到上次观看位置${formatSecond(Number(seeTime))}`)
+                    }, 1000)
+                    return
+                }
                 queryHistoryRecordDetail(state.path).then(res => {
                     console.log(res);
-                    if (res && res.seeTime) {
-                        player!.seek = Number(res.seeTime)
+                    if (res && res.value && res.value.seeTime) {
+                        player!.seek = Number(res.value.seeTime)
                         setTimeout(() => {
-                            Toast.success("已自动定位到上次观看位置")
+                            Toast.success(`已自动定位到上次观看位置${formatSecond(Number(res.value.seeTime))}`)
                         }, 1000)
                     }
                 })

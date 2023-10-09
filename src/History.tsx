@@ -54,23 +54,23 @@ export function History() {
                             <div>浏览历史</div>
                             <Button onClick={handleClearAll} loading={loading} theme='light' type='tertiary' style={{ marginLeft: "10px" }}>清空</Button>
                         </div>
-                        {(Array.isArray(data?.items) && data?.items.length) ? 
-                        <Timeline mode="left">
-                            {data?.items.map(item => {
-                                return (
-                                    <>
-                                        <Timeline.Item key={item.id} onClick={() => goDetail(item)} time={timeAgo(new Date(formatDate(item.updated || '')))} extra={item.path}>
-                                            <div className="cursor-pointer hover:text-blue-500">
-                                                <div>
-                                                    {item.name}
+                        {(Array.isArray(data) && data.length) ?
+                            <Timeline mode="left">
+                                {data?.map(item => {
+                                    return (
+                                        <>
+                                            <Timeline.Item key={item.id} onClick={() => goDetail(item.value)} time={timeAgo(new Date(formatDate(item.updated_at || '')))} extra={item?.value?.path}>
+                                                <div className="cursor-pointer hover:text-blue-500">
+                                                    <div>
+                                                        {item.value.name}
+                                                    </div>
+                                                    <div>看到 {formatSecond(item.value.seeTime || 0)}</div>
                                                 </div>
-                                                <div>看到 {formatSecond(item.seeTime || 0)}</div>
-                                            </div>
-                                        </Timeline.Item>
-                                    </>
-                                )
-                            })}
-                        </Timeline> : <>空空如也</>}
+                                            </Timeline.Item>
+                                        </>
+                                    )
+                                })}
+                            </Timeline> : <>空空如也</>}
                     </Skeleton>
                 </div>
             </div>

@@ -9,6 +9,7 @@ import { FilePreview } from "./file-preview"
 import { HistoryRecord, useHistoryRecord } from "@/lib/hooks/use-history-record"
 import { Notification, Typography } from '@douyinfe/semi-ui';
 import { useNavigate } from "react-router-dom";
+import { formatSecond } from "@/lib/utils"
 
 export function Index() {
     const navigate = useNavigate()
@@ -20,7 +21,7 @@ export function Index() {
 
     useEffect(() => {
         queryHistoryRecordDetail().then((res) => {
-            res && show(res)
+            res && show(res.value)
         })
     }, [api])
 
@@ -28,8 +29,6 @@ export function Index() {
         console.log({ api });
         const path = searchParams.get('path') || '/'
         const type = (searchParams.get('type') || Type.Folder) as Type
-        console.log({ path });
-        console.log({ type });
         setState({
             ...state,
             path,
@@ -46,6 +45,11 @@ export function Index() {
     }
 
     function show(record: HistoryRecord) {
+        const seeTime = searchParams.get('seeTime')
+        if(!record.seeTime || seeTime) {
+            return
+        }
+        const time = seeTime || record.seeTime
         const opts = {
             title: '最近浏览',
             content: (
@@ -54,8 +58,8 @@ export function Index() {
                     <div style={{ marginTop: 8 }}>
                         <Text onClick={() => {
                             close()
-                            navigate(`/?path=${record.path}&type=${Type.File}&seeTime=${record.seeTime}`)
-                        }} link>查看详情</Text>
+                            navigate(`/?path=${record.path}&type=${Type.File}&seeTime=${time}`)
+                        }} link>查看详情{formatSecond(Number(time))}</Text>
                         <Text onClick={() => {
                             close()
                         }} link style={{ marginLeft: 20 }}>
@@ -64,7 +68,7 @@ export function Index() {
                     </div>
                 </>
             ),
-            duration: 60,
+            duration: 10,
         };
         const id = Notification.info(opts);
         setIds([...ids, id]);

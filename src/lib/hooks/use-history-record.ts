@@ -1,9 +1,13 @@
-import { ListResult } from "pocketbase"
-import { pb } from "../pocket_base_client"
 import { ObjType } from "../types/obj"
-import { serverApiState } from "@/store/server"
-import { useRecoilValue } from "recoil"
+import axios from "axios"
 
+type DataType = {
+    id: string
+    type: string
+    key: string
+    value: HistoryRecord
+    updated_at: string
+}
 export type HistoryRecord = {
     serverApi: string
     id?: string
@@ -17,36 +21,45 @@ export type HistoryRecord = {
     seeTime?: number
     type?: ObjType
 }
-
+const DATA_TYPE = 'alist-history'
+const BASE_API = 'https://worker.viewcode.online'
 export function useHistoryRecord() {
-    const serverApi = useRecoilValue(serverApiState)
 
     const getHistoryRecordPage = async (pageNo = 1, pageSize = 20) => {
-        return await pb.collection('history').getList(pageNo, pageSize, {
-            sort: '-updated',
-            filter: `serverApi ~ "${serverApi}"`
-        }) as ListResult<HistoryRecord>
+        const res = await axios.get(`${BASE_API}/api/data/list`, {
+            params: {
+                type: DATA_TYPE,
+                pageNo,
+                pageSize
+            }
+        })
+        return res.data.rows as DataType[]
     }
 
-    const queryHistoryRecordDetail = async (path?: string) => {
+    const queryHistoryRecordDetail = async (path: string) => {
         try {
-            return await pb.collection('history').getFirstListItem(path ? `path="${path}"` : '', {
-                sort: '-updated',
-            }) as HistoryRecord
+            const res =  await axios.get(`${BASE_API}/api/data/get`, {
+                params: {
+                    type: DATA_TYPE,
+                    key: path
+                }
+            }) 
+            return res.data as DataType
         } catch (e) {
             return false
         }
     }
 
-    const upsertHistoryRecord = async (record: HistoryRecord) => {
-        console.log('upsertHistoryRecord==>');
-
-        const data = await queryHistoryRecordDetail(record.path!)
-        if (data) {
-            await pb.collection('history').update(data.id!, { ...data, ...record })
-            return data
+    const upsertHistoryRecord = async (value: HistoryRecord) => {
+        const key = value.path
+        if (!key || !value.seeTime) {
+            return
         }
-        return await pb.collection('history').create(record)
+        await axios.post(`${BASE_API}/api/data/save`, {
+            key,
+            type: DATA_TYPE,
+            value: JSON.stringify(value)
+        })
     }
 
     return {

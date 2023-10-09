@@ -116,7 +116,7 @@ export function FilePreview() {
     useEffect(() => {
         if (serverApi && data && state.path) {
             const { name, type, thumb } = data
-            upsertHistoryRecord({ name, type, thumb, serverApi, path: state.path })
+            // upsertHistoryRecord({ name, type, thumb, serverApi, path: state.path })
             setState({
                 ...state,
                 obj: data
