@@ -1,5 +1,6 @@
 import { ObjType } from "../types/obj"
 import axios from "axios"
+import { getLocalStorage } from "../utils"
 
 type DataType = {
     id: string
@@ -21,9 +22,10 @@ export type HistoryRecord = {
     seeTime?: number
     type?: ObjType
 }
-const DATA_TYPE = 'alist-history'
 const BASE_API = 'https://worker.viewcode.online'
 export function useHistoryRecord() {
+    
+    const DATA_TYPE = 'alist-history' +  getLocalStorage<string | null>('serverApi')
 
     const getHistoryRecordPage = async (pageNo = 1, pageSize = 20) => {
         const res = await axios.get(`${BASE_API}/api/data/list`, {
